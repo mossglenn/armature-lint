@@ -1,0 +1,63 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`the main seed > says, as a commit, only what the seed leaves open on purpose 1`] = `
+{
+  "hits": [
+    "inform coverage.uncovered LearningObjective/describe-model-training in Module/how-ai-works",
+    "inform coverage.uncovered LearningObjective/identify-ai-limitations in Module/how-ai-works",
+    "inform coverage.uncovered LearningObjective/evaluate-appropriate-use in Module/risks-and-ethics",
+    "inform alignment.untargeted-objective LearningObjective/distinguish-bias-types",
+    "inform alignment.untargeted-objective LearningObjective/evaluate-ai-objectives",
+    "inform alignment.untargeted-objective LearningObjective/evaluate-appropriate-use",
+    "inform alignment.untargeted-objective LearningObjective/identify-ai-limitations",
+    "inform alignment.untargeted-objective LearningObjective/write-effective-prompts",
+  ],
+  "summary": "8 for information",
+}
+`;
+
+exports[`the main seed > says, as a merge, only what the seed leaves open on purpose 1`] = `
+{
+  "hits": [
+    "warn coverage.uncovered LearningObjective/describe-model-training in Module/how-ai-works",
+    "warn coverage.uncovered LearningObjective/identify-ai-limitations in Module/how-ai-works",
+    "warn coverage.uncovered LearningObjective/evaluate-appropriate-use in Module/risks-and-ethics",
+    "warn alignment.untargeted-objective LearningObjective/distinguish-bias-types",
+    "warn alignment.untargeted-objective LearningObjective/evaluate-ai-objectives",
+    "warn alignment.untargeted-objective LearningObjective/evaluate-appropriate-use",
+    "warn alignment.untargeted-objective LearningObjective/identify-ai-limitations",
+    "warn alignment.untargeted-objective LearningObjective/write-effective-prompts",
+    "inform alignment.triangle-incomplete LearningObjective/distinguish-ai-approaches in Module/how-ai-works",
+    "inform alignment.triangle-incomplete LearningObjective/describe-model-training in Module/how-ai-works",
+    "inform alignment.triangle-incomplete LearningObjective/identify-ai-limitations in Module/how-ai-works",
+    "inform alignment.triangle-incomplete LearningObjective/evaluate-ai-objectives in Module/ai-in-learning-design",
+    "inform alignment.triangle-incomplete LearningObjective/write-effective-prompts in Module/ai-in-learning-design",
+    "inform alignment.triangle-incomplete LearningObjective/distinguish-bias-types in Module/risks-and-ethics",
+    "inform alignment.triangle-incomplete LearningObjective/evaluate-appropriate-use in Module/risks-and-ethics",
+  ],
+  "summary": "8 warnings, 7 for information",
+}
+`;
+
+exports[`the main seed > says, as a push, only what the seed leaves open on purpose 1`] = `
+{
+  "hits": [
+    "warn coverage.uncovered LearningObjective/describe-model-training in Module/how-ai-works",
+    "warn coverage.uncovered LearningObjective/identify-ai-limitations in Module/how-ai-works",
+    "warn coverage.uncovered LearningObjective/evaluate-appropriate-use in Module/risks-and-ethics",
+    "warn alignment.untargeted-objective LearningObjective/distinguish-bias-types",
+    "warn alignment.untargeted-objective LearningObjective/evaluate-ai-objectives",
+    "warn alignment.untargeted-objective LearningObjective/evaluate-appropriate-use",
+    "warn alignment.untargeted-objective LearningObjective/identify-ai-limitations",
+    "warn alignment.untargeted-objective LearningObjective/write-effective-prompts",
+    "inform alignment.triangle-incomplete LearningObjective/distinguish-ai-approaches in Module/how-ai-works",
+    "inform alignment.triangle-incomplete LearningObjective/describe-model-training in Module/how-ai-works",
+    "inform alignment.triangle-incomplete LearningObjective/identify-ai-limitations in Module/how-ai-works",
+    "inform alignment.triangle-incomplete LearningObjective/evaluate-ai-objectives in Module/ai-in-learning-design",
+    "inform alignment.triangle-incomplete LearningObjective/write-effective-prompts in Module/ai-in-learning-design",
+    "inform alignment.triangle-incomplete LearningObjective/distinguish-bias-types in Module/risks-and-ethics",
+    "inform alignment.triangle-incomplete LearningObjective/evaluate-appropriate-use in Module/risks-and-ethics",
+  ],
+  "summary": "8 warnings, 7 for information",
+}
+`;
