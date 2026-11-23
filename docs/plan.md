@@ -54,7 +54,7 @@ The plan's exit for L1 asks for the seed's results reviewed so the defaults aren
 
 - **`coverage.uncovered`, 3 warnings:** Describe Model Training (no item at all; the seed's draft item assesses nothing), Identify AI Limitations and Evaluate Appropriate AI Use (each with one item in review, which the hit says). The seed holds these to show the projected figure.
 - **`alignment.untargeted-objective`, 5 warnings:** only Module 1 has activities in the seed; Modules 2 and 3 have none. True of the seed, and the loudest part of the result.
-- **`alignment.triangle-incomplete`, 7 for information:** every declaration lacks a formative use but none (the seed has one formative use, of an item that assesses nothing), and repeats the two rules above per module.
+- **`alignment.triangle-incomplete`, 7 for information:** every declaration lacks a formative use (the seed's one formative use is of an item that assesses nothing), and the rule repeats the two above per module.
 - **Quiet:** no item below its objective's level, nothing over-assessed, no orphan, no agent-created record, no self-attested item (the one attestation is the reviewer's, of the designer's item).
 
 Two overlaps for Amos's review, left as they are: the triangle's "no activity" restates `untargeted-objective` per module, and its "no placed item" restates `coverage.uncovered`. The triangle is off at commit and informational elsewhere, so the overlap costs lines, not verdicts. Narrowing it to the formative side alone would remove the repetition and make it a different rule.
