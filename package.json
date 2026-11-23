@@ -1,0 +1,39 @@
+{
+  "name": "@armature/lint",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Soft design rules for an Armature learning design: a pure rule engine and a command line that reads a hub at one commit and says what each rule flags",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "bin": {
+    "armature-lint": "dist/armature-lint.mjs"
+  },
+  "dependencies": {
+    "@armature/client": "github:mossglenn/armature#3018c27b2a1d2323e42d609a5aea80e045dffcb5&path:packages/client",
+    "@armature/types": "github:mossglenn/armature#3018c27b2a1d2323e42d609a5aea80e045dffcb5&path:packages/types",
+    "zod": "4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.1",
+    "esbuild": "0.25.12",
+    "typescript": "5.9.3",
+    "vitest": "4.0.8"
+  },
+  "scripts": {
+    "build": "esbuild src/bin.ts --bundle --platform=node --format=esm --target=node22 --outfile=dist/armature-lint.mjs --banner:js=\"#!/usr/bin/env node\"",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "packageManager": "pnpm@10.28.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}
