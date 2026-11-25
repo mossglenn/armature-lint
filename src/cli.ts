@@ -46,6 +46,14 @@ import { EVENTS, type LintEvent } from './types.js';
  */
 export const HUB_REVISION = '2026-11-20';
 
+/**
+ * The revision from which a workspace hub's feed tells a change to `checks.json`, which makes no commit, as
+ * `requirement.changed` with `personal` (Armature's ADR-0070, note of 2026-11-25). Against a hub that serves it
+ * `watch` needs no sweep after a quiet answer; against an older one it keeps sweeping. Read from `GET
+ * /discover`'s `versions`, never sent: Lint still asks for `HUB_REVISION`, so it works against either.
+ */
+export const PERSONAL_EVENTS_REVISION = '2026-11-25';
+
 export interface Io {
   stdout: (text: string) => void;
   stderr: (text: string) => void;
@@ -134,7 +142,8 @@ async function keepChecking(command: 'watch' | 'serve', args: string[], io: Io):
   const policy = await readPolicy(values.policy as string | undefined, io);
   const hubUrl = (values.hub as string | undefined) ?? io.env.ARMATURE_HUB_URL ?? (command === 'watch' ? 'http://localhost:3101' : 'http://localhost:3100');
   // A held request for the feed lasts up to `wait` seconds, every call may take that and a margin. watch holds
-  // for 10, since each quiet answer is when it looks for a change to checks.json; serve for the hub's most.
+  // for 10: a checks.json edited by hand wakes no request and is told (or, on an older hub, swept for) at the
+  // next answer, so the wait bounds how long that takes. serve holds for the hub's most.
   const wait = io.follow?.wait ?? (command === 'watch' ? 10 : 30);
   const client = clientFor(hubUrl, io, { timeout: (wait + 30) * 1000, ...(io.signal ? { signal: io.signal } : {}) });
 
@@ -154,14 +163,17 @@ async function keepChecking(command: 'watch' | 'serve', args: string[], io: Io):
   }
   const me = await whoAmI(client, io);
   io.stdout(`armature-lint ${command}: following ${hubUrl}${me ? `, reporting as ${me}` : ''}.`);
+  // A personal requirement changes without a commit. A hub at PERSONAL_EVENTS_REVISION tells it, as
+  // requirement.changed, which the loop answers with a sweep; an older one tells nothing, and watch sweeps after
+  // every quiet answer instead.
+  const sweepWhenIdle = command === 'watch' && !discovery.versions.includes(PERSONAL_EVENTS_REVISION);
 
   const mode = command === 'watch' ? workspaceMode(client, policy) : remoteMode(client, me);
   const signal = io.signal ?? new AbortController().signal;
   await follow(client, mode, {
     signal,
     wait,
-    // A personal requirement changes without a commit; watch looks again whenever the feed has been quiet.
-    sweepWhenIdle: command === 'watch',
+    sweepWhenIdle,
     warn: io.stderr,
     check: async (branch, commit) => {
       await reportOn(client, { branch, commit }, await mode.jobs(branch), { ...(me ? { me } : {}), log: io.stdout, warn: io.stderr });

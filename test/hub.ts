@@ -27,6 +27,8 @@ export interface FakeHubOptions {
   me?: string | null;
   /** Leave `armature/checks` out of discovery. */
   noChecks?: boolean;
+  /** The revisions discovery lists; `HUB_REVISION` alone by default, a hub that tells no change to `checks.json`. */
+  versions?: string[];
 }
 
 export function fakeHub(options: FakeHubOptions) {
@@ -87,6 +89,10 @@ export function fakeHub(options: FakeHubOptions) {
       state.events.push({ type: 'commit', branch: 'main', commit });
       state.events.push({ type: 'requirement.changed', branch: 'main', commit, requirements: [r['@id']] });
     },
+    /** `checks.json` changed, as a hub at 2026-11-25 tells it: no commit, no branch. */
+    personalChanged(requirements: string[]) {
+      state.events.push({ type: 'requirement.changed', personal: true, requirements } as FeedEvent);
+    },
     restart() {
       state.life++;
       state.runs = [];
@@ -122,7 +128,7 @@ export function fakeHub(options: FakeHubOptions) {
       if (path === '/discover') {
         return ok({
           role: options.role,
-          versions: [HUB_REVISION],
+          versions: options.versions ?? [HUB_REVISION],
           identity: { resolver: 'header', headers: {} },
           capabilities: options.noChecks ? {} : { 'armature/checks': { fallback: 'reject' } },
           schema: { route: '/api/v1/schema' },
