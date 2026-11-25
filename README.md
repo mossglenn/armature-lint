@@ -62,7 +62,7 @@ lint: you_unit-3 at 42d722d9…, as a commit: pass, 8 for information
         "params": { "rules": { "alignment.bloom-gap": { "push": "require" } } } } ] }
   ```
 
-  A change to the file reaches `watch` within about 10 seconds; nothing is committed when it changes, so `watch` looks again whenever the feed has been quiet.
+  A change saved on the program's Settings page reaches `watch` at once, and one made by hand within about 10 seconds: the hub's event feed tells it (Armature 2026-11-25 and later). Against an older hub, which tells nothing since the file makes no commit, `watch` looks again whenever the feed has been quiet.
 - **When the remote requires a Lint check** of merges from your workspace into its parent, it also posts a preview under that check's name, its summary beginning "Preview of the remote's …". The remote's own service decides; the preview tells you beforehand.
 
 `watch` runs until its standard input closes (as the desktop program's Tools list stops it) or it gets SIGINT or SIGTERM; from a terminal, Ctrl-C.
