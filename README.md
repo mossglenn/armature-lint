@@ -2,7 +2,7 @@
 
 Soft design rules for a learning design kept in an [Armature](https://github.com/mossglenn/armature) hub: objectives no item assesses, items below their objective's Bloom's level, formative checks placed before the teaching, AI-drafted records no person has reviewed. Lint reads the hub at one commit through `/api/v1` and says what each rule flags. It is a client of the hub like any other tool. It never touches the store and runs no code inside the hub.
 
-**Status: L1** (2026-11-22). The rule engine (`@armature/lint`, ten rules) and a command line that runs it once against any hub and ref. Next: L2, `watch` beside a desktop hub and a service beside a remote, posting check runs that a merge or a push can require (Armature's ADR-0070, built). The plan, with every decision and its reason, is [docs/plan.md](docs/plan.md); the whole design is Armature's [docs/lint-plan.md](https://github.com/mossglenn/armature/blob/main/docs/lint-plan.md).
+**Status: L2** (2026-11-25). The rule engine (`@armature/lint`, ten rules); a command line that runs it once against any hub and ref (L1, 2026-11-22); and `watch` beside a desktop hub and `serve` beside a remote, posting check runs that a push or a merge can require (Armature's ADR-0070). Next: L3, layering several requirements' policies, keeping a hit as a finding, and writing requirements from the command line. The plan, with every decision and its reason, is [docs/plan.md](docs/plan.md); the whole design is Armature's [docs/lint-plan.md](https://github.com/mossglenn/armature/blob/main/docs/lint-plan.md).
 
 ## Running it
 
@@ -39,6 +39,57 @@ Identity, as the other Armature tools take it: `ARMATURE_USER` (sent as `Armatur
 
 Exit status: **0** pass, **1** fail (a hit the policy requires), **2** could not run.
 
+## Checking as you work: `watch`
+
+Beside a desktop (workspace) hub, `watch` follows the hub's event feed and posts a check run on each new head of each workspace, which the desktop program and other tools show on that commit:
+
+```sh
+ARMATURE_HUB_URL=http://localhost:3101 ARMATURE_USER=you@example.edu ARMATURE_LOCAL_TOKEN=<the pairing key> \
+  node dist/armature-lint.mjs watch [--policy FILE]
+```
+
+```
+armature-lint watch: following http://localhost:3101, reporting as User/you.
+lint: you_unit-3 at 42d722d9…, as a commit: pass, 8 for information
+```
+
+- **With no rules set up**, it posts `lint` as a commit, under `--policy` or the defaults.
+- **With a personal requirement** naming a Lint check in the program's Settings (`checks.json` in the hub's folder), it posts that check as a push, so a push you gated on Lint goes through once it passes:
+
+  ```json
+  { "requirements": [
+      { "check": "lint/personal", "level": "Required",
+        "params": { "rules": { "alignment.bloom-gap": { "push": "require" } } } } ] }
+  ```
+
+  A change to the file reaches `watch` within about 10 seconds; nothing is committed when it changes, so `watch` looks again whenever the feed has been quiet.
+- **When the remote requires a Lint check** of merges from your workspace into its parent, it also posts a preview under that check's name, its summary beginning "Preview of the remote's …". The remote's own service decides; the preview tells you beforehand.
+
+`watch` runs until its standard input closes (as the desktop program's Tools list stops it) or it gets SIGINT or SIGTERM; from a terminal, Ctrl-C.
+
+## Beside a remote: `serve`
+
+On a remote hub, `serve` is the reporter a `CheckRequirement` names. It follows the feed and, for each branch a Lint requirement binds a merge from, checks the head as a merge under that requirement's `params` and posts the run the merge gate reads. A push arrives as several commits and is checked once, at its last.
+
+```sh
+ARMATURE_HUB_URL=http://hub:3100 ARMATURE_USER=agent:lint/service node dist/armature-lint.mjs serve   # header resolver
+ARMATURE_HUB_URL=https://api.example.edu ARMATURE_TOKEN=<the service's token> node dist/armature-lint.mjs serve   # oidc
+```
+
+Setting it up, once, by an administrator or a maintainer of `main`:
+
+1. **Register the agent** it reports as: `POST /api/v1/users` with `{ "message": "…", "user": { "displayName": "Lint", "externalId": "agent:lint/service" } }`. Under `oidc` the agent is `agent:<client id>` of the service's credential.
+2. **Write the requirement** on `main`, naming that agent as `reporter`:
+
+   ```json
+   { "@type": "CheckRequirement", "check": "lint/team", "reporter": "User/<the agent's id>",
+     "level": "Required", "locked": false, "status": "Active",
+     "params": { "rules": { "coverage.uncovered": { "merge": "require" } } },
+     "rationale": "No objective reaches main unassessed" }
+   ```
+
+`serve` answers only requirements whose check is `lint` or under `lint/` and whose `reporter` is itself; a run by anyone else counts toward nothing. It reads them again when the feed says one changed, checks every head again after the hub restarts, and waits for a hub that goes away. Under `oidc` the token is static for now, renewed by the operator.
+
 ## Policy
 
 Each rule has an action at each event: `off`, `inform`, `warn` or `require`. With no policy, the defaults apply, and no default is `require`. A policy changes them:
@@ -73,7 +124,7 @@ Lint reports records, never people: no rule or output groups hits by author (Arm
 
 ```sh
 pnpm run typecheck
-pnpm test                                     # the rules, the engine, the command line against a fake hub
+pnpm test                                     # the rules, the engine, the command line, watch and serve against fake hubs
 ARMATURE_HUB_URL=http://localhost:3198 pnpm test   # and against a real hub serving Armature's main seed
 ```
 
@@ -85,7 +136,7 @@ node scripts/load_schema.js --recreate && node scripts/seed_data.js
 cd app && npm run build:hub && TERMINUS_DB=armature_lint PORT=3198 HOST=127.0.0.1 node dist/server.mjs
 ```
 
-Lint writes nothing, so a run leaves the store as it found it. `@armature/client` and `@armature/types` are pinned to an Armature commit in `package.json`; CI's contract job seeds that commit's main seed.
+Lint writes nothing to the graph: a check run makes no commit. The contract test of `serve` does, as the seed's designer: it registers `agent:lint/contract` and a requirement for it, Advisory and bound to the branch `lint-contract` alone, and commits once to that branch, so a local database grows by two commits a run; the seed test reads at the seed's own last commit and is not disturbed. `@armature/client` and `@armature/types` are pinned to an Armature commit in `package.json`; CI's contract job seeds that commit's main seed.
 
 ## License
 
