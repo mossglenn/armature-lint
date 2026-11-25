@@ -6,7 +6,7 @@
  * a hub of the other role.
  */
 import { describe, expect, it } from 'vitest';
-import { main, type Io } from '../src/cli.js';
+import { HUB_REVISION, main, PERSONAL_EVENTS_REVISION, type Io } from '../src/cli.js';
 import { fakeHub } from './hub.js';
 
 function io(hub: ReturnType<typeof fakeHub>, rounds: number | undefined, extra: Partial<Io> = {}, files: Record<string, string> = {}) {
@@ -285,6 +285,29 @@ describe('armature-lint watch', () => {
       ['sha256:after', 'fail'],
     ]);
     expect(hub.state.asked.filter((a) => a.path.endsWith('/events') && a.query.since).map((a) => a.query.wait)).toEqual(['10', '10']);
+  });
+
+  it('against a hub that tells a change to checks.json (2026-11-25), sweeps when told and not after a quiet answer', async () => {
+    const hub = fakeHub({ ...owner, versions: [PERSONAL_EVENTS_REVISION, HUB_REVISION] });
+    hub.workspace('amos_unit-3');
+    hub.branch('amos_unit-3', 'c-unit-1');
+    const personal = { check: 'lint/personal', level: 'Required' as const, status: 'Active' as const };
+    hub.state.personal.push({ ...personal, params: { rules: {} }, paramsHash: 'sha256:before' });
+    let afterQuietAnswer = -1;
+    hub.script(
+      // The file changes; this hub would tell it, but the event is held back a round to show no sweep fills the gap.
+      () => (hub.state.personal = [{ ...personal, params: { rules: { 'coverage.uncovered': 'require' } }, paramsHash: 'sha256:after' }]),
+      () => {
+        afterQuietAnswer = hub.runsOn('amos_unit-3').length;
+        hub.personalChanged(['checks.json#lint/personal']);
+      }
+    );
+    await main(['watch'], io(hub, 3).io);
+    expect(afterQuietAnswer).toBe(1);
+    expect(hub.runsOn('amos_unit-3').map((r) => [r.paramsHash, r.conclusion])).toEqual([
+      ['sha256:before', 'pass'],
+      ['sha256:after', 'fail'],
+    ]);
   });
 
   it('takes the local policy for its `lint` run', async () => {

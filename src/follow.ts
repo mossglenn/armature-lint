@@ -19,11 +19,13 @@
  *   (the hub went away mid-run), the same events are asked for again and the
  *   runs already posted are skipped.
  * - **What the feed cannot tell is swept for when idle** (`sweepWhenIdle`,
- *   `watch` only). A person's own requirements live in `checks.json`, which
- *   the program's Settings writes without a commit, so no event follows a
- *   change to them; after each answer with no events the loop sweeps, and a
- *   head already checked under the current hash costs three reads on
- *   loopback. A feed event for that file would end the poll (docs/plan.md §3).
+ *   `watch` against a workspace hub older than revision 2026-11-25). A
+ *   person's own requirements live in `checks.json`, which the program's
+ *   Settings writes without a commit; an older hub tells nothing of a change
+ *   to them, so after each answer with no events the loop sweeps, and a head
+ *   already checked under the current hash costs three reads on loopback. A
+ *   hub at 2026-11-25 tells it as `requirement.changed` with `personal`,
+ *   which leads to the sweep below like any other (docs/plan.md §3).
  * - **An unreachable hub is waited for**, with a delay doubling from
  *   `backoff.first` to `backoff.most`, reset by the next answer. The process
  *   never exits on its own: `watch` ends when its standard input closes, either
