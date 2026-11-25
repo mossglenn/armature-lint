@@ -1,12 +1,13 @@
 # armature-lint's checks.
 #
 #   check     Type-check, build, and the tests that need no hub: every rule over
-#             hand-built snapshots, the engine, the policy, and the command line
-#             against a fake hub.
+#             hand-built snapshots, the engine, the policy, and the command line,
+#             watch and serve against fake hubs.
 #   contract  The same tests with a real hub: TerminusDB as a service, Armature
 #             checked out at the commit package.json pins for @armature/client,
 #             its main seed loaded and its hub started over it; test/seed.test.ts
-#             runs and its reviewed snapshot must hold (docs/plan.md §5).
+#             runs and its reviewed snapshot must hold (docs/plan.md §5), and
+#             test/serve.contract.test.ts runs serve against it (§6).
 name: CI
 
 on:
