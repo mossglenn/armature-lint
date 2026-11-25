@@ -47,13 +47,7 @@ export async function loadSnapshot(client: ArmatureClient, options: LoadOptions 
     client.intelligence.alignment(pin).then((r) => r.data),
     mapLimit(modules, limit, async (id) => [id, (await client.intelligence.moduleContent(id, pin)).data] as const),
     mapLimit(byAgent, limit, async (d) => [d['@id'], (await client.intelligence.attestations(d['@type'] as ClassName, d['@id'], pin)).data] as const),
-    options.base
-      ? client.intelligence.courseCoverage(options.base).then((r) => ({
-          ref: options.base!.ref ?? options.base!.branch ?? 'main',
-          ...(r.commit ? { commit: r.commit } : {}),
-          coverage: r.data,
-        }))
-      : undefined,
+    options.base ? loadBase(client, options.base) : undefined,
   ]);
 
   return {
@@ -66,6 +60,16 @@ export async function loadSnapshot(client: ArmatureClient, options: LoadOptions 
     attestations: Object.fromEntries(attestations),
     ...(base ? { base } : {}),
   };
+}
+
+/**
+ * The merge target's part of a snapshot, for `coverage.regressed`: the
+ * coverage read at a branch or a commit. Read alone when one snapshot is
+ * linted against several targets (`report.ts`), so the export is read once.
+ */
+export async function loadBase(client: ArmatureClient, base: AtRef): Promise<NonNullable<Snapshot['base']>> {
+  const r = await client.intelligence.courseCoverage(base);
+  return { ref: base.ref ?? base.branch ?? 'main', ...(r.commit ? { commit: r.commit } : {}), coverage: r.data };
 }
 
 /** `items` through `fn`, at most `limit` at once, results in order. */
